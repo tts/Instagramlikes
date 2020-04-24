@@ -14,11 +14,20 @@ likes <- fromJSON("likes.json")
 media_likes <- data.frame(likes$media_likes, stringsAsFactors = FALSE)
 names(media_likes) <- c("timestamp","account")
 
-# Whose photos have I liked the most?
+# Whose photos have I liked the most, in total
 media_stat <- media_likes %>% 
   group_by(account) %>% 
   summarise(count = n()) %>% 
   arrange(desc(count))
+
+# Totals related to how long I've followed them
+media_stat_rel_time_followed <- left_join(media_stat, following, by = c("account"="name"))
+
+media_stat_rel_time_followed <- media_stat_rel_time_followed %>% 
+  mutate(prop = count/daysfollowed) %>% 
+  arrange(desc(prop))
+
+top10bytime <- head(media_stat_rel_time_followed, n=10)
 
 # Likes by date
 media <- media_likes %>% 
